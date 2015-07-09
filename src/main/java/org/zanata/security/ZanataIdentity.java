@@ -24,10 +24,13 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.context.SessionScoped;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.Specializes;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.persistence.EntityManager;
 
 import org.picketlink.idm.model.Account;
 import org.picketlink.idm.permission.spi.PermissionResolver;
@@ -35,6 +38,7 @@ import org.picketlink.internal.DefaultIdentity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zanata.model.HAccount;
+import org.zanata.model.HAccountRole;
 import org.zanata.security.annotations.Authenticated;
 import org.zanata.security.authentication.ZanataUser;
 
@@ -47,7 +51,7 @@ import org.zanata.security.authentication.ZanataUser;
 // NB: Identity is @SessionScoped and @Named("identity)
 // We need to override any method in PicketLink's Identity implementation
 // which uses the account field, in case tempAccount has been set.
-@Specializes
+//@Specializes
 public class ZanataIdentity extends DefaultIdentity implements Serializable,
         Impersonator {
     private static final long serialVersionUID = 1L;
@@ -57,7 +61,7 @@ public class ZanataIdentity extends DefaultIdentity implements Serializable,
     private static final ThreadLocal<Account> tempAccount =
             new ThreadLocal<>();
     @Inject
-    private transient PermissionResolver permissionResolver;
+    private transient EntityManager entityManager;
 
     @Produces
     @Dependent
@@ -138,23 +142,45 @@ public class ZanataIdentity extends DefaultIdentity implements Serializable,
         if (getAccount() == ZanataUser.SYSTEM) {
             return true;
         }
-        return isLoggedIn() && permissionResolver.resolvePermission(getAccount(), resource, operation);
+//         TODO [CDI] check this works
+        return isLoggedIn() /*&& permissionResolver.resolvePermission(getAccount(), resource, operation)*/;
     }
 
     public boolean hasPermission(Class<?> resourceClass, Serializable identifier, String operation) {
         if (getAccount() == ZanataUser.SYSTEM) {
             return true;
         }
-        return isLoggedIn() && permissionResolver.resolvePermission(getAccount(), resourceClass, identifier, operation);
+        return isLoggedIn() /*&& permissionResolver.resolvePermission(getAccount(), resourceClass, identifier, operation)*/;
     }
 
     // hasRole is used by SecurityFunctions
     public boolean hasRole(String role) {
-        if (getAccount() == ZanataUser.SYSTEM) {
+        Account account = getAccount();
+        if (account == ZanataUser.SYSTEM) {
             return true;
         }
-        // TODO check the picketlink role
-        throw new UnsupportedOperationException();
+        if (account == null) {
+            return false;
+        }
+
+        if (account instanceof ZanataUser) {
+            HAccount hAccount = ((ZanataUser) account).getAccount();
+            // FIXME [CDI] should use AccountRoleDAO once moved to zanata server
+            // TODO [CDI] [post] integrate with PicketLink IDM
+            for (HAccountRole hAccountRole : hAccount.getRoles()) {
+                if (hAccountRole.getName().equals(role)) {
+                    return true;
+                }
+                for (HAccountRole groupRole : hAccountRole.getGroups()) {
+                    if (groupRole.getName().equals(role)) {
+                        return true;
+                    }
+                }
+            }
+        } else {
+            log.error("Account in identity is not ZanataUser: {}. hasRole check returns false", account.getClass());
+        }
+        return false;
     }
 
 }

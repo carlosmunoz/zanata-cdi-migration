@@ -20,6 +20,7 @@
  */
 package org.zanata.bean;
 
+import org.picketlink.Identity;
 import org.picketlink.idm.model.Account;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,5 +61,12 @@ public class IdentityBean {
     public String getAuthenticated() {
         log.info("authenticated: {}", authenticated);
         return authenticated == null ? "null" : authenticated.getUsername();
+    }
+
+    public boolean hasRole(String role) {
+//        boolean has = identity.hasRole(role);
+//        log.info(">>> has role: {}", has);
+//        return has;
+        return false;
     }
 }

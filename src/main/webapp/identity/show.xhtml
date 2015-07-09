@@ -26,6 +26,10 @@
     Authenticated username: #{identityBean.authenticated},
     Account in identity: #{identityBean.account}
   </h:form>
+
+  <rich:panel rendered="#{identityBean.hasRole('admin')}">
+    You can only see this if you are admin!!
+  </rich:panel>
 </h:body>
 
 </html>
