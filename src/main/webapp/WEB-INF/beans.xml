@@ -8,4 +8,7 @@
     <class>org.apache.deltaspike.security.impl.extension.SecurityInterceptor</class>
     <class>org.zanata.async.AsyncMethodInterceptor</class>
   </interceptors>
+    <alternatives>
+        <class>org.zanata.security.ZanataIdentity</class>
+    </alternatives>
 </beans>

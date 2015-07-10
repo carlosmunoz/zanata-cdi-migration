@@ -52,9 +52,9 @@ public class UserRegistration {
     @Getter @Setter
     private String loginName;
     @Getter @Setter
-    private String firstName;
+    private String firstName = "John";
     @Getter @Setter
-    private String lastName;
+    private String lastName = "Smith";
     @Getter @Setter
     private String password;
 

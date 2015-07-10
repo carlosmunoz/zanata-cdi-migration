@@ -24,8 +24,7 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 import javax.enterprise.context.Dependent;
-import javax.enterprise.context.SessionScoped;
-import javax.enterprise.inject.Instance;
+import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.Specializes;
 import javax.inject.Inject;
@@ -51,7 +50,8 @@ import org.zanata.security.authentication.ZanataUser;
 // NB: Identity is @SessionScoped and @Named("identity)
 // We need to override any method in PicketLink's Identity implementation
 // which uses the account field, in case tempAccount has been set.
-//@Specializes
+@Specializes
+@Alternative
 public class ZanataIdentity extends DefaultIdentity implements Serializable,
         Impersonator {
     private static final long serialVersionUID = 1L;

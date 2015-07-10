@@ -43,7 +43,7 @@ public class IdentityBean {
     @Inject
     private ZanataIdentity identity;
 
-    @Inject @Authenticated
+//    @Inject @Authenticated
     private HAccount authenticated;
 
     public boolean isLoggedIn() {
@@ -59,6 +59,8 @@ public class IdentityBean {
     }
 
     public String getAuthenticated() {
+        Account account = identity.getAccount();
+        authenticated = account != null ? ((ZanataUser) account).getAccount(): null;
         log.info("authenticated: {}", authenticated);
         return authenticated == null ? "null" : authenticated.getUsername();
     }
